@@ -4,10 +4,10 @@ output:
   prettydoc::html_pretty:
     theme: architect
     toc: true
-author: "YOUR NAME HERE"
-date: "2024-09-10"
+author: "Jamison Ward"
+date: "2025-12-07"
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, echo = FALSE}
@@ -43,7 +43,8 @@ pacman::p_load(
   janitor,    # for data analysis utilities
   here,       # to set the working directory
   haven,      # for reading Stata files
-  tidyverse   # for data manipulation and visualization
+  tidyverse,   # for data manipulation and visualization
+  scales
   )
 ```
 
@@ -72,7 +73,7 @@ Then, incorporate these variables into the data import code below.
 ```{r}
 # Import the .dta file and add the 5 malaria knowledge variables
 ir_ng_18_raw <- 
-  __________________(here("data/NGIR7BFL_mini.DTA"),
+  haven::read_dta(here("data/NGIR7BFL_mini.DTA"),
                   col_select = c(
                     # Basic information
                     v006, v007, v009, v010, v012, v013, 
@@ -84,7 +85,7 @@ ir_ng_18_raw <-
                     v201, v212, v213, v511, v531, 
                     
                     # Malaria knowledge variables
-                    "WRITE YOUR CODE HERE" 
+                    s1108ai, s1108ba, s1108bc, s1108bd, s1108bf 
                     
                     ))
 ```
@@ -111,7 +112,11 @@ ir_ng_18_renamed <-
          age_first_sex = v531, 
          
          # Rename malaria knowledge variables
-         "WRITE YOUR CODE HERE" 
+         malaria_cure = s1108ai,
+         malaria_death = s1108ba,
+         malaria_worry = s1108bc,
+         malaria_know_sick = s1108bd,
+         malaria_weak_child_death = s1108bf
          )
 ```
 
@@ -123,7 +128,7 @@ With the suitable function from the `{haven}` package, transform all variables i
 # Add function to convert from labelled data to regular factors
 ir_ng_18_clean <- 
   ir_ng_18_renamed %>% 
-  "WRITE YOUR CODE HERE"
+  haven::as_factor()
 ```
 
 **CHECKPOINT**: You should now have 3 data frames in your Environment: `ir_ng_18_raw`, `ir_ng_renamed`, and `ir_ng_18_clean`. Explore the `ir_ng_18_clean` dataset and ensure that the changes from Steps 1 through 3 have been successfully implemented. Value types should been converted to factors and the columns should have meaningful names. From here, the `ir_ng_18_clean` dataset is now ready to use and ready for plotting!
@@ -136,7 +141,7 @@ Chose your favorite `{ggplot2}` theme and write code to automatically apply it t
 
 ```{r}
 # Change the default theme
-"WRITE YOUR CODE HERE"
+theme_set(theme_minimal())
 ```
 
 ## Histograms and boxplots for continuous distributions
@@ -145,14 +150,30 @@ a.  Choose one of the continuous variables from the dataset, such as `age` or `a
 
 ```{r}
 # Simple histogram
-"WRITE YOUR CODE HERE"
+ggplot(data = ir_ng_18_clean,
+       mapping = aes(x = age)) +
+  geom_histogram(binwidth = 1,
+                 fill = "darkgray",
+                 color = "white") +
+  scale_x_continuous(breaks = seq(0, 50, 5)) +
+  labs(title = "Distribution of Survey Respondant Age",
+       x = "Age",
+       y = "Count")
 ```
 
 b.  Now, create a boxplot to show the distribution of the continuous variable you chose earlier. The distribution should be grouped by one of the variables related to knowledge about malaria. Incorporate the `fill` aesthetic to color the boxes. Also adjust the colors, labels, titles, themes, etc. as you please.
 
 ```{r}
 # Boxplot comparing groups
-"WRITE YOUR CODE HERE"
+ggplot(data = ir_ng_18_clean,
+       mapping = aes(x = malaria_death,
+                     y = age,
+                     fill = malaria_death)) +
+  geom_boxplot() +
+  scale_y_continuous(breaks = seq(0, 50, 5)) +
+  labs(title = "Distribution of Survey Respondant Age",
+       x = "Response",
+       y = "Age")
 ```
 
 ## Barplots for discrete distributions
@@ -161,21 +182,51 @@ a.  Select one of the categorical variables from the dataset. Proceed to generat
 
 ```{r}
 # Simple barplot
-"WRITE YOUR CODE HERE"
+ggplot(data = ir_ng_18_clean,
+       mapping = aes(x = highest_educ)) +
+  geom_bar(color = "black",
+           fill = "steelblue") +
+  labs(title = "Distribution of Survey Respondant Highest Education",
+       x = "Highest Education Level",
+       y = "Count")
 ```
 
 b.  Next, adapt your plot above to create a PERCENT-STACKED bar plot. To do this, add the `fill` aesthetic and set it to a malaria knowledge variable of your choosing; for example: `aes(fill = MALARIA_VAR)`. Remember to add the appropriate `position` argument. The final graph should compare how answers to the malaria knowledge survey question varies between groups.
 
 ```{r}
 # Percent-stacked barplot
-"WRITE YOUR CODE HERE"
+ggplot(data = ir_ng_18_clean,
+       mapping = aes(x = highest_educ,
+                     fill = malaria_worry)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = label_percent()) +
+  labs(title = "Opinion on Easy Treatment of Malaria by Highest Education Level",
+       x = "Highest Education Level",
+       y = "Percent",
+       fill = "") +
+  theme_minimal(base_size = 20) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank()
+  )
 ```
 
 c.  Finally, create a GROUPED bar chart with any two categorical variables of your choice. Adjust the colors, labels, titles, themes, etc. as you please.
 
 ```{r}
 # Grouped barplot
-"WRITE YOUR CODE HERE"
+ggplot(data = ir_ng_18_clean,
+       mapping = aes(x = highest_educ,
+                     fill = malaria_worry)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Opinion on Easy Treatment of Malaria by Highest Education Level",
+       x = "Highest Education Level",
+       y = "Proportion") +
+  theme_minimal(base_size = 20) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank()
+  )
 ```
 
 # Submission: Upload Rmd file
@@ -192,5 +243,18 @@ HINT: The `facet_wrap()` function from `{ggplot2}` will come in handy.
 
 ```{r}
 # Bonus challenge!
-"WRITE YOUR CODE HERE"
+ggplot(data = ir_ng_18_clean,
+       mapping = aes(x = highest_educ,
+                     fill = malaria_worry)) +
+  geom_bar(position = "fill") +
+  labs(title = "Opinion on Easy Treatment of Malaria by Highest Education Level",
+       x = "Highest Education Level",
+       y = "Proportion") +
+  theme_minimal(base_size = 20) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank()
+  ) +
+  coord_polar(theta = "y") +
+  facet_wrap(~highest_educ)
 ```

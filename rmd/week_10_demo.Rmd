@@ -8,7 +8,7 @@ output:
 author: "GRAPH Courses Team"
 date: "2024-09-10"
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r echo = F}
@@ -196,4 +196,10 @@ ggplot(data = ir_clean,
     x = highest_educ,
     fill = urban_rural)) +
   geom_bar()
+
+ggplot(data = ir_clean,
+  mapping = aes(
+    x = highest_educ,
+    fill = urban_rural)) +
+  geom_bar(position = "fill")
 ```
